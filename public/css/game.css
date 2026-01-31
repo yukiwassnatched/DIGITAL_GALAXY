@@ -380,8 +380,8 @@ button:hover {
 }
 
 #idleOverlay img {
-    width: 1%;
-    height: flex;
+    width: 3%;
+    height: auto;
     margin-bottom: 20px;
 }
 
