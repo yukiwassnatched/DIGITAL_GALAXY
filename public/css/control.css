@@ -1,0 +1,72 @@
+/* control.css
+   Simple, focused styles for the control portion of study
+   Kept intentionally small and mobile-friendly. */
+
+/*   Page / Body  
+   Base font, background and page padding for an app-like panel. */
+body {
+  font-family: Arial, sans-serif; /* system-friendly sans */
+  background-color: #0b0f1a; /* very dark navy background */
+  color: #ffffff; /* default text color */
+  padding: 20px; /* overall page inset */
+}
+
+/*   Card Container  
+   Centered card with max-width to keep lines readable on large screens. */
+.container {
+  max-width: 600px; /* limit width for readability */
+  margin: auto; /* center horizontally */
+  background-color: #151a2e; /* slightly lighter panel color */
+  padding: 20px; /* inner spacing */
+  border-radius: 12px; /* soft rounded corners */
+}
+
+/*   Headings   */
+h2 {
+  text-align: center; /* center the section title */
+}
+
+/*   Form Labels  
+   Labels are block-level with spacing above so inputs stack cleanly. */
+label {
+  display: block;
+  margin-top: 15px;
+}
+
+/*   Form Controls (inputs, selects, textareas, buttons)  
+   Shared sizing and basic appearance for consistent form layout. */
+input,
+select,
+textarea,
+button {
+  width: 100%; /* full-width controls inside the container */
+  padding: 10px; /* comfortable hit target */
+  margin-top: 5px; /* small gap from label */
+  border-radius: 6px; /* subtle rounding */
+  border: none; /* flat look */
+  font-size: 16px; /* legible text size */
+}
+
+/* Allow vertical resizing only for long text fields */
+textarea {
+  resize: vertical;
+}
+
+/*   Buttons  
+   Primary action styling with hover feedback. */
+button {
+  margin-top: 20px; /* separate from other controls */
+  background-color: #4da6ff; /* primary accent */
+  cursor: pointer; /* indicates interactivity */
+}
+
+button:hover {
+  background-color: #79b8ff; /* lighter on hover */
+}
+
+/*   Status / Feedback Area  
+   Centered small status message below controls. */
+#statusMessage {
+  margin-top: 15px;
+  text-align: center;
+}

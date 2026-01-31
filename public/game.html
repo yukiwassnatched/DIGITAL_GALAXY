@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Digital Galaxy – Mission</title>
+  <link rel="stylesheet" href="css/game.css" />
+</head>
+
+<body>
+  <!--  Overlay  -->
+  <div id="missionOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h2>🚀 Mission Complete</h2>
+      <p>Data successfully transmitted to Digital Galaxy.</p>
+
+      <div class="overlay-rewards">
+        <span id="overlayXP"></span>
+        <span id="overlayBadge"></span>
+      </div>
+
+      <button id="closeOverlay">Continue</button>
+    </div>
+  </div>
+
+  <!--  Idle Overlay  -->
+  <div id="idleOverlay" class="hidden">
+    <img src="/assets/images/characters/glorp-alien-car.gif" alt="Stars" />
+    <h2>🌌 Take a break! Explore the stars 🌌</h2>
+    <p>Move your mouse or click to return</p>
+  </div>
+
+  <div id="questPanel">
+    <h3>Quests</h3>
+    <ul id="questList"></ul>
+    <div id="streakDisplay">🔥 Current Streak: 0 days</div>
+  </div>
+  <div id="questOverlay" class="hidden overlay">Quest Completed!</div>
+
+  <!--  Main Game  -->
+  <div class="container">
+    <h1>🌌 Mission: Star Recovery</h1>
+
+    <p class="story">
+      Light pollution has angered the stars.
+      We need your help to locate and document them before they disappear.
+      <br> Please go outside or go to your window and observe the sky for a few minutes. 
+      <br>Identify if there are stars that you can see, and recall if there is a pattern you identify. 
+      You can search the pattern up!
+    </p>
+
+    <div class="stats">
+      <span id="xp" class="xp">XP: 0</span>
+      <span id="badge" class="badge-unlocked">Badge: None</span>
+    </div>
+
+    <div class="xp-bar-container">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <p class="xp-progress-text" id="xpProgressText"></p>
+
+    <div class="mission">
+      <div class="form-column">
+        <label>Date Observed</label>
+        <input id="dateObserved" type="date" />
+
+        <label>Did you see any stars?</label>
+        <select id="sawStars">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+
+        <label>Estimated number of stars</label>
+        <input id="starCount" type="number" min="0" />
+
+        <label>Draw the pattern you saw</label>
+        <div id="canvasWrapper">
+          <canvas id="starCanvas"></canvas>
+        </div>
+        <button id="clearCanvas">Clear Drawing</button>
+
+        <label>Pattern description (optional)</label>
+        <textarea id="patternDescription"></textarea>
+
+        <button id="submitBtn">Submit Mission</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/game.js"></script>
+  <script type="module" src="js/tracker.js"></script>
+</body>
+
+</html>

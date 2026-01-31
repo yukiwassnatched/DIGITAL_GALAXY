@@ -1,0 +1,124 @@
+/*   BODY & GLOBAL STYLING  
+   Global page defaults. These keep the page centered, set the
+   background theme and base typography/colors used across the
+   "assigned" page. */
+body {
+    margin: 0; /* remove default browser margin */
+    min-height: 100vh; /* ensure full viewport height */
+    display: flex; /* center content vertically/horizontally */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    /* subtle radial background: deep navy to black */
+    background: radial-gradient(circle, #19265e, #000000);
+
+    /* readable, system-friendly sans-serif stack */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: antiquewhite; /* light text against dark background */
+    text-align: center; /* center headings and short text */
+    overflow: hidden; /* prevents scroll artifacts during animations */
+    padding: 10px; /* small breathing room on smaller viewports */
+}
+
+/*   CENTER CONTAINER  
+   The main content wrapper that animates into view. Uses a
+   vertical flex layout and adapts to the viewport width. */
+.center_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* spacing between child elements */
+    max-width: 90vw; /* responsive constraint on very wide screens */
+    width: 100%;
+
+    /* entrance animation: start invisible slightly lower */
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeSlide 2s ease forwards;
+    animation-delay: 0.5s; /* small delay so title animates first */
+}
+
+/* optional modifier: increase the entry delay when needed */
+.center_container.delayed {
+    animation-delay: 1s;
+}
+
+/* simple fade + slide upward animation used across elements */
+@keyframes fadeSlide {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*   PAGE TITLE  
+   Strong, responsive heading style. Uses `clamp()` so the size
+   scales smoothly between devices without media queries. */
+h1 {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: clamp(2rem, 6vw, 3rem); /* responsive scaling */
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #7aa2ff; /* soft blue accent for the title */
+    margin: 1%;
+
+    /* entrance animation, slightly earlier than the container */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlide 1.5s ease forwards;
+    animation-delay: 0.3s;
+}
+
+/*   VERSION TEXT  
+   Smaller title/subtitle used to display version or short info.
+   Keeps a single line with `white-space: nowrap` to avoid wrapping. */
+.versionText {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: clamp(1.2rem, 5vw, 2rem); /* responsive scaling */
+    color: #ffffff;
+    text-align: center;
+    margin: 0;
+    overflow: hidden;
+    white-space: nowrap; /* keep it on one line */
+
+    /* animate slightly after the main title */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlide 1.5s ease forwards;
+    animation-delay: 0.6s;
+}
+
+/*   CONTINUE BUTTON  
+   Primary CTA button. Uses `clamp()` to keep padding and font-size
+   comfortable across devices and a pill shape via a large border-radius. */
+#continueBtn {
+    margin-top: 1%;
+
+    /* responsive padding: vertical horizontal */
+    padding: clamp(10px, 2vw, 14px) clamp(20px, 5vw, 28px);
+    border-radius: 999px; /* fully rounded pill */
+    border: none;
+
+    /* readable, slightly bold button text */
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    font-weight: 600;
+
+    /* subtle glossy gradient accent */
+    background: linear-gradient(135deg, #7aa2ff, #4f6cff);
+    color: #000; /* dark text for good contrast on the light gradient */
+    cursor: pointer;
+    font-family: 'Pixelify Sans', sans-serif;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    /* entrance animation: last element to animate in */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlide 1.5s ease forwards;
+    animation-delay: 0.9s;
+}
+
+#continueBtn:hover {
+    transform: translateY(-2px); /* lift on hover */
+    box-shadow: 0 8px 20px rgba(122, 162, 255, 0.4); /* soft glow */
+}

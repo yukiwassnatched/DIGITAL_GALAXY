@@ -1,0 +1,134 @@
+/* This page is used for index.html styling
+
+/*   Page / Body  */
+body {
+    margin: 0;
+    min-height: 100vh;
+    /* ensure full viewport height on most browsers */
+    min-height: 100dvh;
+    /* fallback for mobile viewport units */
+    display: flex;
+    /* center content vertically/horizontally */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #19265e, #000000);
+    /* deep navy to black */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* system-friendly stack */
+    color: antiquewhite;
+    /* light text on dark background */
+    text-align: center;
+    /* center short blocks of text by default */
+}
+
+/*   Centered container  
+   Reusable centered wrapper that fades/slides into view. */
+.center_container {
+    text-align: center;
+    max-width: 1000px;
+    /* limit width for readability */
+    width: 100%;
+    padding: 20px;
+
+    /* entrance animation: start off slightly lower and invisible */
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeSlide 2s ease forwards;
+    animation-delay: 0.5s;
+}
+
+/* animation for the text when you open website */
+.center-container.delayed {
+    animation-delay: 1s;
+}
+
+/*   Titles and headings   */
+.title {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    color: #7aa2ff;
+    /* soft blue accent for main title */
+}
+
+.heading-1 {
+    font-size: 1.3rem;
+    max-width: 700px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+    /* improve readability for body text */
+}
+
+.heading-2 {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 15px;
+}
+
+.heading-3 {
+    font-size: 0.95rem;
+    opacity: 0.7;
+}
+
+/*   Password box (small component)  
+   Note: this preserves existing sizing; values like `height: 5px`
+   or duplicated `font-size` came from the original file and are
+   intentionally left unchanged to avoid altering layout. */
+.password_box {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 20px;
+    margin-top: 30px;
+    padding: 18px 22px;
+    border-radius: 20px;
+    border: none;
+    width: 200px;
+    height: 5px;
+    /* original file value preserved */
+    font-size: 1.2rem;
+    /* duplicated in original, kept as-is */
+    text-align: center;
+    /* center the password text */
+}
+
+/*   Button for submit */
+button {
+    margin-top: 10px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    /* pill-shaped */
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #7aa2ff, #4f6cff);
+    color: #000;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-family: 'Pixelify Sans', sans-serif;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(122, 162, 255, 0.4);
+}
+
+.hint {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+/*   Miscellaneous: keep original small utility rules   */
+.password {
+    size-adjust: auto;
+}
+
+/*   Animations   */
+@keyframes fadeSlide {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

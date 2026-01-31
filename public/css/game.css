@@ -1,0 +1,398 @@
+/* game.css
+   Styles for the game's UI: canvas, overlays, XP, quest panel,
+   and responsive tweaks. */
+
+/*   Global box-sizing reset   */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/*   Page / body  
+   Background animation, base type sizing and safe spacing. */
+body {
+    background: radial-gradient(circle at top, #0b0f2b, #000);
+    color: #fff;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-size: 200% 200%;
+    animation: cosmicShift 10s ease infinite;
+    /* slow parallax-like shift */
+    font-size: clamp(14px, 1.6vw, 18px);
+    /* responsive base font */
+}
+
+/* subtle, looping background position animation */
+@keyframes cosmicShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/*   Layout containers   */
+/* fluid container centers content and constrains max width */
+.container {
+    width: 100%;
+    max-width: clamp(320px, 92vw, 720px);
+    margin: 0 auto;
+    padding: clamp(14px, 4vw, 28px);
+}
+
+.form-column {
+    width: 100%;
+    max-width: clamp(260px, 88vw, 520px);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 2.5vw, 16px);
+}
+
+/*   Canvas area  
+   Wrapper centers canvas and provides responsive sizing. */
+#canvasWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 1vh 1vw;
+}
+
+#starCanvas {
+    width: min(90vw, 600px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    /* keep square on most viewports */
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+/*   Typography / small utilities   */
+h1 {
+    text-align: center;
+}
+
+.story {
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.mission {
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.mission label {
+    width: 100%;
+    text-align: left;
+    margin-top: 14px;
+    font-weight: 500;
+}
+
+/*   Form controls  
+   Shared rules for inputs and buttons to keep consistent touch targets. */
+input,
+select,
+textarea,
+button {
+    width: 100%;
+    min-width: 0;
+    padding: clamp(8px, 1.6vw, 12px);
+    font-size: clamp(0.9rem, 1.4vw, 1rem);
+    border-radius: 8px;
+}
+
+button {
+    background: #5a6cff;
+    /* primary CTA color */
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+#feedback {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Redundant canvas wrapper rules tightened for responsive sizing */
+#canvasWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#starCanvas {
+    width: 100%;
+    max-width: clamp(260px, 88vw, 520px);
+    aspect-ratio: 1 / 1;
+    background: black;
+    border-radius: 12px;
+    touch-action: none;
+    /* improve touch handling for canvas interactions */
+}
+
+/*   XP visuals   */
+.xp {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.xp.bump {
+    transform: scale(1.2);
+    color: #ffd700;
+}
+
+.xp-float {
+    position: absolute;
+    color: #ffd700;
+    font-weight: bold;
+    animation: floatUp 1s ease-out forwards;
+    /* float-and-fade effect */
+}
+
+@keyframes floatUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+}
+
+@keyframes badgeGlow {
+    0% {
+        box-shadow: 0 0 5px gold;
+    }
+
+    50% {
+        box-shadow: 0 0 20px gold;
+    }
+
+    100% {
+        box-shadow: 0 0 5px gold;
+    }
+}
+
+.badge-unlocked {
+    animation: badgeGlow 1.2s ease;
+    color: gold;
+}
+
+/* Overlay / modal components
+   Fullscreen overlay and modal card used for rewards, pause, etc. */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 10, 25, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.6s ease forwards;
+}
+
+.hidden {
+    display: none;
+}
+
+.overlay-card {
+    background: linear-gradient(145deg, #0d1b3d, #121f4a);
+    border-radius: 16px;
+    /* responsive padding + width for small screens */
+    width: clamp(260px, 80vw, 420px);
+    padding: clamp(12px, 4vw, 28px);
+    text-align: center;
+    box-shadow: 0 0 30px rgba(120, 160, 255, 0.4);
+    animation: popUp 0.5s ease forwards;
+}
+
+.overlay-card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.overlay-rewards {
+    margin: 1.5rem 0;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: space-around;
+}
+
+.overlay-card button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #5c7cfa;
+    color: white;
+    cursor: pointer;
+}
+
+.overlay-card button:hover {
+    background: #748ffc;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes popUp {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/*   XP Progress Bar   */
+.xp-bar-container {
+    width: 100%;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.xp-bar-fill {
+    height: 100%;
+    width: 0%;
+    /* animated at runtime to indicate progress */
+    background: linear-gradient(90deg, #7fdbff, #b388ff);
+    border-radius: 10px;
+    transition: width 0.4s ease-out;
+}
+
+.xp-progress-text {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    text-align: center;
+}
+
+/*   Quest panel (fixed on right)  
+   Compact, scrollable list of active quests / objectives. */
+#questPanel {
+    position: fixed;
+    top: clamp(12px, 3vw, 28px);
+    right: clamp(8px, 3vw, 20px);
+    width: clamp(200px, 28vw, 340px);
+    max-width: 30vw;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    font-family: sans-serif;
+    z-index: 1000;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+#questPanel h3 {
+    margin-top: 0;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 8px;
+}
+
+#questPanel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#questPanel li {
+    margin: 8px 0;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+#questPanel li.completed {
+    background: rgba(0, 255, 128, 0.3);
+    /* greenish for completed */
+    text-decoration: line-through;
+    color: #fff;
+}
+
+#questPanel li:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/*   Idle overlay (covers entire screen when idle)   */
+#idleOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(10, 10, 30, 0.95), rgba(0, 0, 0, 0.95));
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    text-align: center;
+    z-index: 9999;
+    transition: opacity 0.5s;
+}
+
+#idleOverlay.hidden {
+    display: none;
+}
+
+#idleOverlay img {
+    width: 1%;
+    height: flex;
+    margin-bottom: 20px;
+}
+
+/*   Small-screen adjustments   */
+@media (max-width: 420px) {
+    .stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    button {
+        padding: 10px;
+    }
+}

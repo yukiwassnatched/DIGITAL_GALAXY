@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Star Observation Log</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/control.css">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Star Observation Log</h2>
+    <p>
+      Hello! The point of this activity it to understand if using regular methods such as a traditional website helps with particpant rentention. <br> Please go outside or go to your window and observe the sky for a few minutes. Identify if there are stars that you can see, and recall if there is a pattern you identify. You can search the pattern up!
+      Please log your observations of the night sky below and answer the following questions based on your night sky observation.
+      Estimates are fine.
+    </p>
+
+    <!-- 1. Date of observation -->
+    <label for="dateObserved">Date of observation</label>
+    <input id="dateObserved" type="date">
+
+    <!-- 2. Did you see stars? -->
+    <label for="sawStars">Did you see any stars?</label>
+    <select id="sawStars">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <!-- 3. Number of stars seen -->
+    <label for="starCount">Approximately how many stars did you see?</label>
+    <input id="starCount" type="number" min="0">
+
+    <!-- 4. Constellation description -->
+    <label for="patternDescription">What constellation pattern did it resemble?</label>
+    <textarea id="patternDescription" rows="4" placeholder="Describe the pattern you noticed"></textarea>
+
+    <!-- 5. Submit button -->
+    <button id="submitBtn">Submit Observation</button>
+
+    <!-- Status message -->
+    <p id="statusMessage"></p>
+  </div>
+  <script type="module" src="js/control.js"></script>
+  <script type="module" src="jstracker.js"></script>
+</body>
+
+</html>
