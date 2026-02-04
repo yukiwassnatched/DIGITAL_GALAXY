@@ -4,172 +4,189 @@
   Responsibilities:
   - serve static files from `public/`
   - accept a minimal `/login` POST for participant allocation
-  - persist lightweight allocation state in `server/data.json`
+  - persist allocation state in Firebase Firestore
+*/
 
-  This file intentionally keeps logic simple and synchronous
-  so the allocation rules are easy to inspect. */
+const express = require("express");
+const path = require("path");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
 
-const express = require("express"); // Express framework
-const fs = require("fs"); // For file system access
-const path = require("path"); // For file paths
-const session = require("express-session"); // For session management
-const cookieParser = require("cookie-parser"); // To read cookies
+const admin = require("firebase-admin");
+const serviceAccount = JSON.parse(
+  fs.readFileSync(".env/firebaseKey.json", "utf8")
+); // Firebase service account key
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
+const db = admin.firestore(); // Firestore database reference
+
+// APP SETUP 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // Use environment port or default to 3000
 
-// Parse JSON bodies and serve the front-end from `public/`.
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.static("public")); // Serve static files
-app.use(cookieParser()); // To read cookies
+// MIDDLEWARE
 
-// *
-app.use(
+app.use(express.json());
+app.use(express.static("public")); 
+app.use(cookieParser());
+
+app.use( // Session middleware
   session({
-    secret: process.env.SESSION_SECRET || "mySecretKey123", // use strong env secret in production
+    secret: process.env.SESSION_SECRET || "mySecretKey123",
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 28,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax"
-    }
+      sameSite: "lax",
+    },
   })
 );
 
-// Redirect homepage based on session condition
-app.get("/", (req, res) => {
-  // Check if session exists
-  if (req.session.userId && req.session.condition) {
-    const page = req.session.condition === "control" ? "/control.html" : "/game.html";
-    return res.redirect(page);
-  }
-
-  // If no session, check cookie
-  const userIdFromCookie = req.cookies?.userId; // or use JS to read cookie
-  if (userIdFromCookie) {
-    const data = loadData();
-    // Look for user in JSON
-    let condition = null;
-    if (Object.values(data.control).some(u => u.userId === userIdFromCookie)) {
-      condition = "control";
-    } else if (Object.values(data.game).some(u => u.userId === userIdFromCookie)) {
-      condition = "game";
-    }
-    if (condition) {
-      // Restore session
-      req.session.userId = userIdFromCookie;
-      req.session.condition = condition;
-      const page = condition === "control" ? "/control.html" : "/game.html";
-      return res.redirect(page);
-    }
-  }
-
-  // Not logged in → show login page
-  res.sendFile(path.join(__dirname, "public", "login.html"));
-});
-
-
-// ====== CONFIGURATION ======
-// Allowed participant passwords (pre-issued codes used by participants) and are given along with website address
+// CONFIGURATION 
 const PASSWORDS = [
   "DG01", "DG02", "DG03", "DG04", "DG05",
-  "DG06", "DG07", "DG08"
+  "DG06", "DG07", "DG08", "DG09", "DG10"
 ];
 
-// Simple JSON file used as a tiny on-disk store for allocation state.
-const DATA_FILE = path.join(__dirname, "data.json");
+const MAX_PER_GROUP = 5; // Max participants per condition
 
-// Maximum participants allowed per condition
-const MAX_PER_GROUP = 4;
+// HELPER FUNCTIONS 
 
-// ====== DATA HANDLING ======
-// Very small synchronous helpers to read/write the JSON store.
-// It logs any used passwords 
-function loadData() {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      const emptyData = { control: {}, game: {}, usedPasswords: [] };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(emptyData, null, 2));
-      return emptyData;
-    }
-    const raw = fs.readFileSync(DATA_FILE, "utf8");
-    const parsed = raw ? JSON.parse(raw) : {};
-    return {
-      control: parsed.control || {},
-      game: parsed.game || {},
-      usedPasswords: parsed.usedPasswords || []
-    };
-  } catch (err) {
-    // On error return a safe empty structure so the server can continue. Participant pool is small and cookies will save progress if they log in again
-    console.error("Data load error:", err);
-    return { control: {}, game: {}, usedPasswords: [] };
-  }
+// Count participants per condition from Firestore
+async function getCounts() {
+  const snapshot = await db.collection("participants").get();
+  let control = 0;
+  let game = 0;
+
+  snapshot.forEach(doc => { // Iterate through each participant
+    const data = doc.data();
+    if (data.condition === "control") control++;
+    if (data.condition === "game") game++;
+  });
+
+  return { control, game };
 }
 
-function saveData(data) {
-  // Synchronous write; acceptable here because the dataset is tiny.
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+// Assign condition using real database counts
+async function assignCondition() {
+  const counts = await getCounts();
 
-//  HELPER FUNCTIONS 
-// Count how many participant shells are stored per condition.
-function getCounts(data) {
-  return {
-    control: Object.keys(data.control || {}).length,
-    game: Object.keys(data.game || {}).length
-  };
-}
-
-// Simple allocation policy:
-// - If both arms are full, return null (study full)
-// - If one arm is full, place new participant in the other arm
-// - Otherwise randomly assign 50/50
-function assignCondition(counts) {
   if (counts.control >= MAX_PER_GROUP && counts.game >= MAX_PER_GROUP) return null;
   if (counts.control >= MAX_PER_GROUP) return "game";
   if (counts.game >= MAX_PER_GROUP) return "control";
   return Math.random() < 0.5 ? "control" : "game";
 }
 
-//  LOGIN + RANDOMIZATION 
-// Minimal endpoint used by the front-end to validate a pre-issued
-// password and allocate a participant to a condition.
-app.post("/login", (req, res) => {
+// ROUTES 
+app.get("/", async (req, res) => {
+  try {
+    // 1️⃣ Check session first
+    if (req.session.userId && req.session.condition) {
+      const page = req.session.condition === "control" ? "/control.html" : "/game.html";
+      return res.redirect(page);
+    }
+
+    // 2️⃣ Check cookie and restore session from Firebase
+    const userIdFromCookie = req.cookies?.userId;
+    if (userIdFromCookie) {
+      const doc = await db.collection("participants").doc(userIdFromCookie).get();
+      if (doc.exists) {
+        const { condition } = doc.data();
+
+        // restore session for this tab
+        req.session.userId = userIdFromCookie;
+        req.session.condition = condition;
+
+        const page = condition === "control" ? "/control.html" : "/game.html";
+        return res.redirect(page);
+      }
+    }
+
+    // 3️⃣ Default: show login page
+    res.sendFile(path.join(__dirname, "public", "login.html"));
+  } catch (err) {
+    console.error("Error in GET /:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// LOGIN + RANDOMIZATION 
+app.post("/login", async (req, res) => {
   const { password } = req.body;
-  const data = loadData();
 
-  if (!PASSWORDS.includes(password)) return res.status(401).json({ error: "Invalid password" });
-  if (data.usedPasswords.includes(password)) return res.status(403).json({ error: "Password already used" });
+  if (!PASSWORDS.includes(password)) {
+    return res.status(401).json({ error: "Invalid password" });
+  }
 
-  const counts = getCounts(data);
-  const condition = assignCondition(counts);
-  if (!condition) return res.status(403).json({ error: "Study full" });
+  try {
+    // Check if password already used
+    const passwordDoc = await db.collection("usedPasswords").doc(password).get();
+    if (passwordDoc.exists) {
+      return res.status(403).json({ error: "Password already used" });
+    }
 
-  const userNumber = counts[condition] + 1;
-  const userId = `${condition}_${userNumber}`;
+    // Assign condition using counts from Firestore
+    const countsSnapshot = await db.collection("participants").get();
+    let controlCount = 0;
+    let gameCount = 0;
+    countsSnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.condition === "control") controlCount++;
+      if (data.condition === "game") gameCount++;
+    });
 
-  data.usedPasswords.push(password);
-  data[condition][userNumber] = { userId };
+    let condition;
+    if (controlCount >= MAX_PER_GROUP && gameCount >= MAX_PER_GROUP) {
+      return res.status(403).json({ error: "Study full" });
+    } else if (controlCount >= MAX_PER_GROUP) {
+      condition = "game";
+    } else if (gameCount >= MAX_PER_GROUP) {
+      condition = "control";
+    } else {
+      condition = Math.random() < 0.5 ? "control" : "game";
+    }
 
-  saveData(data);
+    // Generate user ID
+    const userNumber = condition === "control" ? controlCount + 1 : gameCount + 1;
+    const userId = `${condition}_${userNumber}`;
 
-  // Save session info
-  req.session.userId = userId;
-  req.session.condition = condition;
+    // Save participant to Firebase
+    await db.collection("participants").doc(userId).set({
+      userId,
+      condition,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
 
-  // Save cookie to persist across Render restarts
-  res.cookie("userId", userId, { 
-    maxAge: 1000 * 60 * 60 * 24 * 28, 
-    sameSite: "lax", 
-    secure: process.env.NODE_ENV === "production"
-  });
+    // Mark password as used
+    await db.collection("usedPasswords").doc(password).set({
+      password,
+      usedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
 
-  return res.json({ success: true, userId, condition });
+    // Save session
+    req.session.userId = userId;
+    req.session.condition = condition;
+
+    // Save cookie for persistent login
+    res.cookie("userId", userId, {
+      maxAge: 1000 * 60 * 60 * 24 * 28, // 28 days
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return res.json({ success: true, userId, condition });
+  } catch (err) {
+    console.error("Login error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
 //  START SERVER 
 app.listen(PORT, () => {
-  console.log(`Digital Galaxy running at http://localhost:${PORT}`);
+  console.log(`Digital Galaxy is running on http://localhost:${PORT}`);
 });
