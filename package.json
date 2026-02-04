@@ -3,6 +3,7 @@
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "firebase": "^12.7.0"
+    "firebase": "^12.7.0",
+    "firebase-admin": "^12.7.0"
   }
 }
